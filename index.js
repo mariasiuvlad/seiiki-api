@@ -2,20 +2,25 @@ const express = require('express');
 const {createProxyMiddleware} = require('http-proxy-middleware');
 const app = express();
 
-const target = 'http://192.168.0.102';
 const port = 3000;
 
 const heatingProxy = createProxyMiddleware({
-  target,
+  target: 'http://192.168.0.102',
   changeOrigin: true,
   pathRewrite: {
-    '^/heating/status': '/',
-    '^/heating/on': '/on',
-    '^/heating/off': '/off',
+    '^/api/heating/status': '/',
+    '^/api/heating/on': '/on',
+    '^/api/heating/off': '/off',
   },
 });
 
-app.use('/heating', heatingProxy);
+const webProxy = createProxyMiddleware({
+  target: 'http://localhost:5000',
+  changeOrigin: true,
+});
+
+app.use('/api/heating', heatingProxy);
+app.use('/', webProxy);
 
 app.listen(port, () => {
   console.log(`seiiki-api listening at http://localhost:${port}`);
